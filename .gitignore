@@ -1,0 +1,5 @@
+# scrape tool output, not source
+saveweb2zip-com-www-standardarabia-com.zip
+
+# accidental nested duplicate of the whole site
+card data/

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Certificate - Standard Arabia</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 40px 15px;
+  }
+  .form-wrap, .list-wrap {
+    max-width: 820px;
+    margin: 0 auto 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    padding: 30px 28px;
+  }
+  h1, h2 {
+    margin: 0 0 22px;
+    color: #222;
+    text-align: center;
+  }
+  h1 { font-size: 22px; }
+  h2 { font-size: 19px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  .field { margin-bottom: 16px; }
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d3d8e0;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  input:focus {
+    outline: none;
+    border-color: #345eb2;
+    box-shadow: 0 0 0 2px rgba(52,94,178,0.15);
+  }
+  input[readonly] { background: #eef1f6; color: #777; }
+  .btn-row { display: flex; gap: 10px; margin-top: 6px; }
+  button {
+    padding: 12px;
+    background: #345eb2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+  }
+  button:hover { background: #2a4b92; }
+  button:disabled { background: #9aa9c4; cursor: not-allowed; }
+  #cancelEditBtn { background: #888; display: none; }
+  #cancelEditBtn:hover { background: #6d6d6d; }
+  #message { text-align: center; font-weight: 600; margin-top: 16px; min-height: 20px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 13px;
+    color: #555;
+    border-bottom: 2px solid #e5e8ee;
+    padding: 10px 8px;
+  }
+  tbody td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #eef1f6;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  .actions-cell { white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+  .btn-edit, .btn-delete {
+    flex: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+  .btn-delete { background: #c0392b; }
+  .btn-delete:hover { background: #a3291c; }
+  .detail-row td { background: #f9fafc; }
+  .detail-box p { margin: 4px 0; font-size: 13px; color: #333; }
+  #listMessage { text-align: center; font-weight: 600; color: #888; }
+
+  /* Toggle switch */
+  .switch { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background-color: #ccc; transition: .2s; border-radius: 24px;
+  }
+  .slider::before {
+    position: absolute; content: ""; height: 18px; width: 18px;
+    left: 3px; bottom: 3px; background-color: #fff; transition: .2s; border-radius: 50%;
+  }
+  .switch input:checked + .slider { background-color: #345eb2; }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+</style>
+</head>
+<body>
+
+<div class="form-wrap">
+  <h1 id="formTitle">Add Certificate Record</h1>
+
+  <form id="certForm">
+    <div class="field">
+      <label for="cno">Certificate No. (cno)</label>
+      <input id="cno" type="text" placeholder="e.g. SA-OPR-597112" required>
+    </div>
+
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" type="text" placeholder="e.g. MUHAMMAD TARIQ KHAN MUHAMMAD IQBAL" required>
+    </div>
+
+    <div class="field">
+      <label for="iqamaNo">Iqama No / ID</label>
+      <input id="iqamaNo" type="text" inputmode="numeric" placeholder="e.g. 2625576653" required>
+    </div>
+
+    <div class="field">
+      <label for="courseTitle">Course Title</label>
+      <input id="courseTitle" type="text" placeholder="e.g. WORK PERMIT RECEIVER" required>
+    </div>
+
+    <div class="field">
+      <label for="issueDate">Issue Date (DD-MM-YYYY)</label>
+      <input id="issueDate" type="text" placeholder="e.g. 28-01-2026" pattern="\d{2}-\d{2}-\d{4}" required>
+    </div>
+
+    <div class="field">
+      <label for="validUntil">Valid Until (DD-MM-YYYY)</label>
+      <input id="validUntil" type="text" placeholder="e.g. 27-01-2027" pattern="\d{2}-\d{2}-\d{4}" required>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" id="cancelEditBtn">Cancel Edit</button>
+      <button type="submit" id="submitBtn">Save Certificate</button>
+    </div>
+  </form>
+
+  <p id="message"></p>
+</div>
+
+<div class="list-wrap">
+  <h2>All Certificates</h2>
+  <p id="listMessage">Loading...</p>
+  <table id="certTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>CNO</th>
+        <th>Name</th>
+        <th>Course</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="certTableBody"></tbody>
+  </table>
+</div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("certForm");
+  const message = document.getElementById("message");
+  const submitBtn = document.getElementById("submitBtn");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+  const formTitle = document.getElementById("formTitle");
+  const cnoInput = document.getElementById("cno");
+
+  const tableEl = document.getElementById("certTable");
+  const tbody = document.getElementById("certTableBody");
+  const listMessage = document.getElementById("listMessage");
+
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+  let editingCno = null;
+  let records = [];
+
+  function escapeHtml(val) {
+    if (val === null || val === undefined || val === "") return "-";
+    return String(val)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function showMessage(text, color) {
+    message.textContent = text;
+    message.style.color = color;
+  }
+
+  function resetForm() {
+    form.reset();
+    editingCno = null;
+    cnoInput.readOnly = false;
+    formTitle.textContent = "Add Certificate Record";
+    submitBtn.textContent = "Save Certificate";
+    cancelEditBtn.style.display = "none";
+  }
+
+  function startEdit(rec) {
+    editingCno = rec.cno;
+    document.getElementById("cno").value = rec.cno;
+    document.getElementById("name").value = rec.name || "";
+    document.getElementById("iqamaNo").value = rec.iqama_no || "";
+    document.getElementById("courseTitle").value = rec.course_title || "";
+    document.getElementById("issueDate").value = rec.issue_date || "";
+    document.getElementById("validUntil").value = rec.valid_until || "";
+
+    cnoInput.readOnly = true;
+    formTitle.textContent = "Edit Certificate Record: " + rec.cno;
+    submitBtn.textContent = "Update Certificate";
+    cancelEditBtn.style.display = "block";
+    showMessage("", "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  cancelEditBtn.addEventListener("click", () => {
+    resetForm();
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const cno = document.getElementById("cno").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const iqamaNoRaw = document.getElementById("iqamaNo").value.trim();
+    const courseTitle = document.getElementById("courseTitle").value.trim();
+    const issueDate = document.getElementById("issueDate").value.trim();
+    const validUntil = document.getElementById("validUntil").value.trim();
+
+    if (!cno || !name || !iqamaNoRaw || !courseTitle || !issueDate || !validUntil) {
+      showMessage("⚠️ Please fill in all fields.", "red");
+      return;
+    }
+
+    if (!datePattern.test(issueDate) || !datePattern.test(validUntil)) {
+      showMessage("⚠️ Dates must be in DD-MM-YYYY format.", "red");
+      return;
+    }
+
+    const payload = {
+      cno,
+      name,
+      iqama_no: iqamaNoRaw,
+      course_title: courseTitle,
+      issue_date: issueDate,
+      valid_until: validUntil
+    };
+
+    submitBtn.disabled = true;
+    showMessage("Saving...", "#345eb2");
+
+    const { error } = await supabaseClient
+      .from("certificates")
+      .upsert(payload, { onConflict: "cno" });
+
+    submitBtn.disabled = false;
+
+    if (error) {
+      console.error(error);
+      showMessage("❌ Supabase Error: " + error.message, "red");
+      return;
+    }
+
+    showMessage(editingCno ? "✅ Certificate updated successfully." : "✅ Certificate saved successfully.", "green");
+    resetForm();
+    loadCertificates();
+  });
+
+  async function deleteRecord(cno) {
+    if (!confirm("Delete certificate " + cno + "? This cannot be undone.")) return;
+
+    const { error } = await supabaseClient.from("certificates").delete().eq("cno", cno);
+
+    if (error) {
+      alert("❌ Delete failed: " + error.message);
+      return;
+    }
+
+    if (editingCno === cno) resetForm();
+    loadCertificates();
+  }
+
+  function renderTable() {
+    tbody.innerHTML = "";
+
+    records.forEach((rec) => {
+      const mainRow = document.createElement("tr");
+      mainRow.innerHTML = `
+        <td>${escapeHtml(rec.cno)}</td>
+        <td>${escapeHtml(rec.name)}</td>
+        <td>${escapeHtml(rec.course_title)}</td>
+        <td class="actions-cell">
+          <button type="button" class="btn-edit">Edit</button>
+          <button type="button" class="btn-delete">Delete</button>
+          <label class="switch">
+            <input type="checkbox" class="toggle-view">
+            <span class="slider"></span>
+          </label>
+        </td>
+      `;
+
+      const detailRow = document.createElement("tr");
+      detailRow.className = "detail-row";
+      detailRow.style.display = "none";
+      detailRow.innerHTML = `
+        <td colspan="4">
+          <div class="detail-box">
+            <p><strong>Iqama No:</strong> ${escapeHtml(rec.iqama_no)}</p>
+            <p><strong>Issue Date:</strong> ${escapeHtml(rec.issue_date)}</p>
+            <p><strong>Valid Until:</strong> ${escapeHtml(rec.valid_until)}</p>
+          </div>
+        </td>
+      `;
+
+      mainRow.querySelector(".btn-edit").addEventListener("click", () => startEdit(rec));
+      mainRow.querySelector(".btn-delete").addEventListener("click", () => deleteRecord(rec.cno));
+      mainRow.querySelector(".toggle-view").addEventListener("change", (e) => {
+        detailRow.style.display = e.target.checked ? "table-row" : "none";
+      });
+
+      tbody.appendChild(mainRow);
+      tbody.appendChild(detailRow);
+    });
+  }
+
+  async function loadCertificates() {
+    listMessage.textContent = "Loading...";
+    listMessage.style.display = "block";
+    tableEl.style.display = "none";
+
+    const { data, error } = await supabaseClient
+      .from("certificates")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      listMessage.textContent = "⚠️ Could not load records: " + error.message;
+      return;
+    }
+
+    records = data || [];
+
+    if (records.length === 0) {
+      listMessage.textContent = "No certificates added yet.";
+      return;
+    }
+
+    listMessage.style.display = "none";
+    tableEl.style.display = "table";
+    renderTable();
+  }
+
+  loadCertificates();
+});
+</script>
+
+</body>
+</html>

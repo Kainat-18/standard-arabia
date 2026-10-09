@@ -2,9 +2,9 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Standard Arabia Inspection company Saudi Arabia</title>
-	
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
     <meta name="description" content="Standard Arabia Inspection Co. Ltd has been established in 2015 at Al Jubail – Saudi Arabia. We specialize in Third-Party Inspection, Safety and Operator Training and Certification, Advance and conventional NDT services, Marine Services, Material testing and Calibration with divisions names as Standard Arabia Training Center and Standard Arabia testing and Calibration. We have branches in all major cities of the country/GCC including – Al Khobar, Riyadh, Jeddah, Yanbu, Turaif, Shuqaiq, Jizan, Tabuk & Bahrain.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="Standard Arabia Inspection Co. Ltd, Standard Arabia, Standard Arabia KSA, Standard Arabia Saudi, Standard Arabia Inspection, Standard Arabia Inspection KSA, Scaffolding Inspection & Consultancy, Rigging & Technical Training, Marine Testing Laboratories, Material Testing Laboratories, Advanced & Conventional NDT, Equipment Maintenance Service, Coating Inspection, Operator Training & Assessment, IPAF Training MEWP's, Test Weight & Load Cell Rental, Calibration Service, Standard Arabia Inspection Co. KSA, Scaffolding Inspection, Technical Certification Program, Marine Survey Services, Material Testing, Advanced Conventional NDT, Equipment Maintenance, Coating Inspection Services, Operator Certification Program, IPAF Training Courses, Test Weight & Load Cell Rental Service, Calibration, Saudi Vision 2030, Standard Arabia Scaffolding Inspection Service, Standard Arabia Technical Certification Program, Scaffollding Inspection Service, Technical Certification, Marine Testing, Conventional NDT, Equipment Maintenance in Saudi, Coating Inspection in Saudi, Operator Training, Test Weight & Load Cell Rental in Saudi, Calibration Service in Saudi, Third Party Inspection in Saudi, Lifting Equipment Inspection in Saudi, Asset Integrity, Asset Integrity in Saudi, Asset Management and Maintenance consulting, Accident Investigation, Accident Investigation in Saudi, on-site advice & assistance to investigate Accidents, ISO Audit & Certifications, ISO Audit & Certification Services in KSA,  ISO audit and certification services, Elevator / Escalator Inspection in Saudi, Amusement Ride Inspection, Warehouse  Inspection, Technical Manpower Service, Manpower Service, Manpower Service in KSA, Rigging & Lifting Consultancy Service, Standard Arabia Inspection Company, Third-Party Inspection Compnay, Standard Arabia Training Center, Standard Arabia We Are Beyond, Approved from IPAF AND Food Safety,Rigger I, II, III certification Program, Rigger Level III, Rigger Level II, Rigger Level I, Scaffold Inspection Service, Marine Services, Cargo Survey for Barge & Vessel, On-hire Bunker and Condition, Cleanliness Inspection, P & I Cargo /Insurance / Loss & Damage, Inspection of Luxury and Fishing Boats, Testing Services for a Safe and Sound Structure, Masonary Inspection, Reinforced/ Fresh Concrete Inspection, Soils & Aggregates Inspection, Asphalt Inspection, Geo-Technical Inspection, Structural Steel Inspection, Water Inspection, Conventional NDT Services,  heavy equipment maintenance services, comprehensive coating inspection services, Measurement of Surface Roughness and Coat Thickness, Quality Assurance & Quality Control Services, Training for Coating and Lining Supervisors, Assessment of Mechanical Damage and Non-conformances, Field Investigations of Failure Analysis Root Cause, operator training programs, Earthmoving Equipment Operator Training Program,  Test Weights & Load Cell Without the Cost of Ownership, Quality Ensured Calibration Service, Test Weight, Load Cell, Training and Workshops at Drilling and Servicing Companies, Creating Safe Work Environment, Safe Lifting Equipment Inspection, Lifting Gear Inspection, Load Testing & Certification, Earth Moving & Heavy Equipment Inspection, Heavy Vehicle Inspection, Industrial Equipment Inspection, Lifting Equipment Inspection, Load Testing & Certification, Fall Protection System, Stringing Equipment Inspection, Amusement Rides Inspection Keeping Your Guests Safe, comprehensive elevator and escalator inspection services, Standard Arabia Marine Survey Services, Standard Arabia is TVTC, Saudi Arabia Approved Training Center accredited by International Agency, Standard Arabia modern Inspection and training solutions, Standard Arabia Third-Party Inspection, Training, Material testing, NDT & certification provider, Rigging and Lifting Consultancy Services, Rigging and Lifting Consultancy Services in KSA, Warehouse Inspection, Warehouse Inspection in KSA, Warehouse Inspection & Certification, Warehouse Inspection and Certification services, Scaffolding Training program, Elevating Equipment ">
@@ -540,60 +540,40 @@
 </style>
 
 
-<!-- 🔹 FIREBASE SCRIPT -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+<!-- 🔹 Certificate Verification (Supabase) -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAKgxLXL3rUKW91VXhKlXFpCXecNp6api8",
-      authDomain: "standard-arabia.firebaseapp.com",
-      databaseURL: "https://standard-arabia-default-rtdb.firebaseio.com",
-      projectId: "standard-arabia",
-      storageBucket: "standard-arabia.appspot.com",
-      messagingSenderId: "36670884259",
-      appId: "1:36670884259:web:033e08fe1d7c7c52237216",
-      measurementId: "G-5TF2VCL2V5"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
     const form = document.getElementById("verifyForm");
     const msg = document.getElementById("message");
 
     // Verify Button Action
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const cno = document.getElementById("cno").value.trim();
 
-     
+      const { data, error } = await supabaseClient
+        .from("certificates")
+        .select("cno")
+        .eq("cno", cno)
+        .maybeSingle();
 
-  
+      if (error) {
+        console.error(error);
+        msg.textContent = "⚠️ Error: " + error.message;
+        msg.style.color = "red";
+        return;
+      }
 
-      // Fetch certificate from Firebase
-      db.ref("certificates/" + cno).once("value")
-        .then(snapshot => {
-          if (snapshot.exists()) {
-           
-            setTimeout(() => {
-              // Redirect to your result page
-              window.location.href = "details.html?search=" + encodeURIComponent(cno);
-            }, 1000);
-          } else {
-            msg.textContent = "❌ No record found for this certificate number.";
-            msg.style.color = "red";
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          msg.textContent = "⚠️ Firebase Error: " + error.message;
-          msg.style.color = "red";
-        });
+      if (data) {
+        setTimeout(() => {
+          // Redirect to your result page
+          window.location.href = "details.html?search=" + encodeURIComponent(cno);
+        }, 1000);
+      } else {
+        msg.textContent = "❌ No record found for this certificate number.";
+        msg.style.color = "red";
+      }
     });
   });
 </script>

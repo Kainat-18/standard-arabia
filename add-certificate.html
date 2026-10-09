@@ -135,13 +135,13 @@
     </div>
 
     <div class="field">
-      <label for="issueDate">Issue Date (DD-MM-YYYY)</label>
-      <input id="issueDate" type="text" placeholder="e.g. 28-01-2026" pattern="\d{2}-\d{2}-\d{4}" required>
+      <label for="issueDate">Issue Date</label>
+      <input id="issueDate" type="date" required>
     </div>
 
     <div class="field">
-      <label for="validUntil">Valid Until (DD-MM-YYYY)</label>
-      <input id="validUntil" type="text" placeholder="e.g. 27-01-2027" pattern="\d{2}-\d{2}-\d{4}" required>
+      <label for="validUntil">Valid Until</label>
+      <input id="validUntil" type="date" required>
     </div>
 
     <div class="btn-row">
@@ -186,9 +186,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const tbody = document.getElementById("certTableBody");
   const listMessage = document.getElementById("listMessage");
 
-  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+  const issueDateInput = document.getElementById("issueDate");
+  const validUntilInput = document.getElementById("validUntil");
+
   let editingCno = null;
   let records = [];
+
+  // "2026-01-28" -> "28-01-2026"
+  function isoToDmy(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    return `${d}-${m}-${y}`;
+  }
+
+  // "28-01-2026" -> "2026-01-28"
+  function dmyToIso(dmy) {
+    if (!dmy) return "";
+    const [d, m, y] = dmy.split("-");
+    return `${y}-${m}-${d}`;
+  }
+
+  // Auto-set Valid Until to one year after Issue Date
+  issueDateInput.addEventListener("change", () => {
+    if (!issueDateInput.value) return;
+    const d = new Date(issueDateInput.value);
+    d.setFullYear(d.getFullYear() + 1);
+    validUntilInput.value = d.toISOString().slice(0, 10);
+  });
 
   function escapeHtml(val) {
     if (val === null || val === undefined || val === "") return "-";
@@ -220,8 +244,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("name").value = rec.name || "";
     document.getElementById("iqamaNo").value = rec.iqama_no || "";
     document.getElementById("courseTitle").value = rec.course_title || "";
-    document.getElementById("issueDate").value = rec.issue_date || "";
-    document.getElementById("validUntil").value = rec.valid_until || "";
+    issueDateInput.value = dmyToIso(rec.issue_date);
+    validUntilInput.value = dmyToIso(rec.valid_until);
 
     cnoInput.readOnly = true;
     formTitle.textContent = "Edit Certificate Record: " + rec.cno;
@@ -242,16 +266,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = document.getElementById("name").value.trim();
     const iqamaNoRaw = document.getElementById("iqamaNo").value.trim();
     const courseTitle = document.getElementById("courseTitle").value.trim();
-    const issueDate = document.getElementById("issueDate").value.trim();
-    const validUntil = document.getElementById("validUntil").value.trim();
+    const issueDate = issueDateInput.value;
+    const validUntil = validUntilInput.value;
 
     if (!cno || !name || !iqamaNoRaw || !courseTitle || !issueDate || !validUntil) {
       showMessage("⚠️ Please fill in all fields.", "red");
-      return;
-    }
-
-    if (!datePattern.test(issueDate) || !datePattern.test(validUntil)) {
-      showMessage("⚠️ Dates must be in DD-MM-YYYY format.", "red");
       return;
     }
 
@@ -260,8 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
       name,
       iqama_no: iqamaNoRaw,
       course_title: courseTitle,
-      issue_date: issueDate,
-      valid_until: validUntil
+      issue_date: isoToDmy(issueDate),
+      valid_until: isoToDmy(validUntil)
     };
 
     submitBtn.disabled = true;
